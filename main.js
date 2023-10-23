@@ -1,26 +1,21 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
 
-// Create a new instance of the WebDriver
 const driver = new Builder()
-  .forBrowser('chrome') // You can change 'chrome' to 'firefox' or other supported browsers
+  .forBrowser('chrome') 
   .build();
 
 
-const linklist = ['https://www.etoro.com/markets/nvda']
+const linklist = ['https://www.marketwatch.com/investing/stock/nvda', 'https://www.marketwatch.com/investing/stock/aapl', 'https://www.marketwatch.com/investing/stock/msft', 'https://www.marketwatch.com/investing/stock/intc', 'https://www.marketwatch.com/investing/stock/tsla']
 
 async function getPrice(url) {
   try {
-    // Navigate to the website
-    await driver.get(url); // Replace with the URL of the website you want to interact with
+    await driver.get(url); 
 
-    // Wait for a specific element to be visible (change the selector accordingly)
-    await driver.wait(until.elementLocated(By.className('header-info-stats-content ng-star-inserted')), 100000); // Replace 'buttonId' with the actual element ID or other suitable selector
+    await driver.wait(until.elementLocated(By.className('intraday__price ')), 100000); 
 
-    // Click the button
-    let price = await driver.findElement(By.className('header-info-stats-content ng-star-inserted')).getText();
+    let price = await driver.findElement(By.className('intraday__price ')).getText();
 
     return price;
-    // You can add more interactions or assertions here
   } catch (error) {
     console.error('An error occurred:', error);
   }
@@ -28,17 +23,14 @@ async function getPrice(url) {
 
 async function getName(url) {
   try {
-    // Navigate to the website
-    await driver.get(url); // Replace with the URL of the website you want to interact with
+    await driver.get(url); 
 
-    // Wait for a specific element to be visible (change the selector accordingly)
-    await driver.wait(until.elementLocated(By.className('mobile-instrument-name-fullname')), 100000); // Replace 'buttonId' with the actual element ID or other suitable selector
+    await driver.wait(until.elementLocated(By.className('company__name')), 100000);
 
-    // Click the button
-    let name = await driver.findElement(By.className('mobile-instrument-name-fullname')).getText();
+    let name = await driver.findElement(By.className('company__name')).getText();
 
     return name;
-    // You can add more interactions or assertions here
+    
   } catch (error) {
     console.error('An error occurred:', error);
   }
@@ -48,12 +40,17 @@ const fs = require('fs');
 
 async function writePrice() {
   for (let i = 0; i < linklist.length; i++) {
-    let price = await getPrice(linklist[i]);
+    let price1 = await getPrice(linklist[i]);
+
+    let price = price1.substring(2);
+
     let filename = await getName(linklist[i]);
+
     let filePath = `./${filename}.txt`;
-    await fs.writeFile(filePath, price, (err) => {
+
+    await fs.appendFile(filePath, '\n' + price, (err) => {
       if (err) throw err;
-      console.log(`Data was written to ${filePath}`);
+      console.log('${price} was appended to the ${filePath}');
   });
   }
   await driver.quit();
